@@ -5,6 +5,7 @@ public class JetMotor : MonoBehaviour {
 	public float torque = 20;
 	public float force = 20;
 	
+	
 //	private float[,] force_map = new float[1,1];
 //	private float[,] torque_map = new float[1,1];
 	

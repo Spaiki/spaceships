@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 
 public class NewBlasterGun : MonoBehaviour {
+	private NetworkManager manager;
 	private float fire_timer = 0;
 	private bool fire_pressed = false;
 	
@@ -11,6 +12,10 @@ public class NewBlasterGun : MonoBehaviour {
 	public float force = 20;
 	public float fire_rate = 5;
 	
+	void Awake(){
+		manager = GameObject.FindGameObjectWithTag("NetworkManager").GetComponent<NetworkManager>();
+	}
+	
 	// Use this for initialization
 	void Start () {
 
@@ -18,6 +23,7 @@ public class NewBlasterGun : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		
 		if(rigidbody==null || projectile==null)
 			return;
 
@@ -34,41 +40,15 @@ public class NewBlasterGun : MonoBehaviour {
 	
 	void Fire() {
 		if(fire_pressed){
-			var clone = (GameObject) Instantiate(projectile,spawnPoint.position,spawnPoint.rotation);
+			var groupID = manager.AllocateID();
+			var clone = (GameObject) Network.Instantiate(projectile,spawnPoint.position,spawnPoint.rotation, groupID);
+			clone.GetComponent<Projectile>().groupID = groupID;
+			Debug.Log("Group: " + clone.networkView.group);
+				
 			clone.rigidbody.velocity = rigidbody.velocity;
 			clone.rigidbody.AddForce(spawnPoint.forward*force);
 			fire_timer = 1/fire_rate;
 			fire_pressed = false;
 		}
-	}
-	
-//	void Fire() {
-//		if(fire_pressed){
-//			var id = Network.AllocateViewID();
-//			var clone = Instantiate(projectile, spawnPoint.position, Quaternion.identity) as GameObject;
-//			clone.GetComponent<NetworkView>().viewID = id;
-//			networkView.RPC("SpawnProjectile",RPCMode.Others,id,spawnPoint.position);
-//			clone.rigidbody.velocity = rigidbody.velocity;
-//			clone.rigidbody.AddForce(spawnPoint.forward*force);
-//			fire_timer = 1/fire_rate;
-//			fire_pressed = false;
-//		}
-//	}
-	
-//	void Fire() {
-//		if(fire_pressed){
-//			var id = Network.AllocateViewID();
-//			var clone = projectile.GetComponent<NetworkObject>().CreateObject(projectile, spawnPoint);
-//			clone.rigidbody.velocity = rigidbody.velocity;
-//			clone.rigidbody.AddForce(spawnPoint.forward*force);
-//			fire_timer = 1/fire_rate;
-//			fire_pressed = false;
-//		}
-//	}
-	
-	[RPC]
-	void SpawnProjectile(NetworkViewID id, Vector3 position){
-		var clone = Instantiate(projectile, position, Quaternion.identity) as GameObject;
-		clone.GetComponent<NetworkView>().viewID = id;
 	}
 }

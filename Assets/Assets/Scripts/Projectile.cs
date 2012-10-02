@@ -2,19 +2,12 @@ using UnityEngine;
 using System.Collections;
 
 public class Projectile : MonoBehaviour {
-
-	void Start () {
-
-	}
+	public int groupID;
 	
-
-	void Update () {
-
-	}
-	
-	[RPC]
-	void SpawnProjectileRPC(NetworkViewID id){
-		var clone = (GameObject)Instantiate(gameObject);
-		clone.GetComponent<NetworkView>().viewID = id;
+	void OnDestroy(){
+		Debug.Log("Removing: " + groupID);
+		if(groupID>999){
+			Network.RemoveRPCs(Network.player, groupID);
+		}
 	}
 }
